@@ -71,6 +71,20 @@ export const goals = sqliteTable('goals', {
   effectiveFrom: integer('effective_from').notNull(), // unix ms
 });
 
+// --- NutritionCache ---
+// Caches resolved USDA lookups by normalized food name, so repeat foods
+// (chicken, rice, egg...) never re-hit the network after the first time.
+export const nutritionCache = sqliteTable('nutrition_cache', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  normalizedName: text('normalized_name').notNull().unique(), // lowercase, trimmed
+  fdcId: text('fdc_id').notNull(),
+  caloriesPer100g: real('calories_per_100g').notNull(),
+  proteinPer100g: real('protein_per_100g').notNull(),
+  carbsPer100g: real('carbs_per_100g').notNull(),
+  fatPer100g: real('fat_per_100g').notNull(),
+  cachedAt: integer('cached_at').notNull(),
+});
+
 // --- Relations (for Drizzle's relational query API) ---
 export const daysRelations = relations(days, ({ many }) => ({
   meals: many(meals),
